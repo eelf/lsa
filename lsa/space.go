@@ -201,7 +201,20 @@ func (s Space) senderOne() error {
 			}
 
 			rEv := lsa.Revent{Dir: ev.dir, Name: ev.name}
-			fp, err := os.Open(path)
+
+			fi, err := os.Lstat(path)
+			var fp *os.File
+			if err == nil && fi.Mode() & os.ModeSymlink == 0 {
+				fp, err = os.Open(path)
+				if err == nil {
+					fi, err = fp.Stat()
+					if err != nil {
+						fp.Close()
+						return err
+					}
+				}
+			}
+
 			if err != nil {
 				if !os.IsNotExist(err) {
 					return err
@@ -211,13 +224,15 @@ func (s Space) senderOne() error {
 				}
 				rEv.Typ = lsa.TDelete
 			} else {
-				fi, err := fp.Stat()
-				if err != nil {
-					fp.Close()
-					return err
-				}
 				rEv.Stat = lsa.NewStat(fi)
-				if fi.IsDir() {
+				if fi.Mode() & os.ModeSymlink != 0 {
+					rEv.Typ = lsa.TWrite
+					symlink, err := os.Readlink(path)
+					if err != nil {
+						return err
+					}
+					rEv.Content = []byte(symlink)
+				} else if fi.IsDir() {
 					rEv.Typ = lsa.TWrite
 					fp.Close()
 				} else if fi.Size() > bigSize {

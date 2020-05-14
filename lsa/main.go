@@ -78,7 +78,9 @@ func diff(dir string) error {
 		events = append(events, Event{dir: dir, name: name, isDelete: true})
 	}
 	repo.SetDirStat(dir, repoInfo)
-	eventLog.Add(events)
+	if len(events) > 0 {
+		eventLog.Add(events)
+	}
 	return nil
 }
 

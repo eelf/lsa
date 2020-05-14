@@ -1,0 +1,2 @@
+KNOWN BUGS
+- does not detect changes in symlink when size is same
