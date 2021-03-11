@@ -6,7 +6,7 @@ package main
 import "C"
 import "unsafe"
 
-var pathCh chan string
+var pathCh chan <- string
 
 //export watchCallback
 func watchCallback(s uintptr, info uintptr, n C.size_t, paths, flags, ids uintptr) {
@@ -17,7 +17,7 @@ func watchCallback(s uintptr, info uintptr, n C.size_t, paths, flags, ids uintpt
 	}
 }
 
-func Watch(path string, ch chan string) {
+func Watch(path string, ch chan <- string) {
 	pathCh = ch
 	go C.watch(C.CString(path))
 }

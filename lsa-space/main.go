@@ -28,7 +28,7 @@ func writeContents(file string, stat *lsa.Stat, contents []byte) error {
 
 	if stat.IsDir() {
 		if err = os.Mkdir(file, 0777); err != nil {
-			return fmt.Errorf("cannot mkdir %s: %s", file, err)
+			return fmt.Errorf("cannot mkdir %s: %s lstat was:%v", file, err, lstat)
 		}
 		if err = os.Chmod(file, stat.Mode()); err != nil {
 			return fmt.Errorf("cannot chmod dir %s: %s", file, err)

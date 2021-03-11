@@ -68,7 +68,7 @@ func (s Space) senderOne() error {
 	}
 
 	args := []string{"-e", "ssh " + strings.Join(sshOptions(), " ")}
-	args = append(args, "-a", "--delete", "--stats", "./", hostUser+":"+s.dir+"/")
+	args = append(args, "-az", "--delete", "--stats", "./", hostUser+":"+s.dir+"/")
 
 	command := execCommand("rsync", args...)
 	output, err := command.CombinedOutput()

@@ -16,7 +16,7 @@ type Event struct {
 type eventsChunk []Event
 
 type client struct {
-	notify chan bool
+	notify chan struct{}
 	chunks []*eventsChunk
 	pos    int
 }
@@ -32,7 +32,7 @@ func NewEventLog() EventLog {
 }
 
 func (l *EventLog) AddClient(name string) {
-	ch := make(chan bool, 1)
+	ch := make(chan struct{}, 1)
 	l.mu.Lock()
 	l.clients[name] = &client{notify: ch, chunks: []*eventsChunk{l.chunk}}
 	l.mu.Unlock()
@@ -57,7 +57,7 @@ func (l *EventLog) Add(e []Event) {
 
 	for _, client := range l.clients {
 		select {
-		case client.notify <- true:
+		case client.notify <- struct{}{}:
 		default:
 		}
 	}
@@ -86,7 +86,7 @@ func (l *EventLog) Get(name string, ctx context.Context) (res []Event) {
 		client.chunks = client.chunks[0:chunks-1]
 
 		select {
-		case client.notify <- true:
+		case client.notify <- struct{}{}:
 		default:
 		}
 	} else if len(*client.chunks[0]) > client.pos {

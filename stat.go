@@ -51,6 +51,8 @@ func (s *Stat) Diff(o *Stat) bool {
 		return !o.isDir || s.mode != o.mode
 	}
 	if s.isLink {
+		//if size stays same but content changes then it is wrong considered no change
+		//maybe store content of link in stat
 		return !o.isLink || s.size != o.size
 	}
 	return o.isDir || o.isLink || s.mode != o.mode || s.size != o.size || s.mtime != o.mtime

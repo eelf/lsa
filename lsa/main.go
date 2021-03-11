@@ -53,6 +53,11 @@ func diff(dir string) error {
 
 		newEl := lsa.NewStat(fi)
 		if !ok || el.Diff(newEl) {
+
+			if newEl.IsDir() {
+				log.Printf("dir appeared or changed %v -> %v", el, newEl)
+			}
+
 			repoInfo[fi.Name()] = newEl
 			events = append(events, Event{dir: dir, name: fi.Name()})
 
@@ -61,6 +66,11 @@ func diff(dir string) error {
 				err := itDir(
 					filepath.Join(dir, fi.Name()),
 					func(dir2 string, fi2 os.FileInfo) {
+
+						if fi2.IsDir() {
+							log.Printf("dirrecu after parent appeared or changed %v", lsa.NewStat(fi2))
+						}
+
 						repo.AddFileToDir(dir2, fi2.Name(), lsa.NewStat(fi2))
 						events = append(events, Event{dir: dir2, name: fi2.Name()})
 					},
@@ -122,12 +132,14 @@ func sshOptions() []string {
 	return options
 }
 
+var Version string
+
 func main() {
 	log.SetPrefix(fmt.Sprintf("% -10s", ""))
 
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	log.Println("mem sys", fmtSize(int(m.Sys)), "alloc", fmtSize(int(m.Alloc)))
+	log.Println(Version, "mem sys", fmtSize(int(m.Sys)), "alloc", fmtSize(int(m.Alloc)))
 
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
